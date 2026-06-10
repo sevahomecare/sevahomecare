@@ -205,6 +205,7 @@
     }
 
     .menu-toggle {
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
       display: none;
       width: 44px;
       height: 44px;
@@ -801,11 +802,20 @@
       }
 
       .menu-toggle {
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
         display: inline-flex;
       }
     }
 
     @media (max-width: 640px) {
+      .hero-stats {
+        display:grid;
+        grid-template-columns:1fr;
+        gap:10px;
+        margin-top:20px;
+      }
+      .hero-stat{text-align:center;}
+
       .cards-3,
       .values,
       .form-row {
@@ -1252,7 +1262,9 @@
           <span class="badge">Quick Message</span>
           <h2 class="section-title">Send Us a Message</h2>
 
-          <form id="contactForm" class="form-grid">
+          <form id="contactForm" class="form-grid" action="https://formspree.io/f/xykapbpv" method="POST">
+    <input type="hidden" name="_subject" value="New Website Inquiry - Seva Homecare">
+    <input type="hidden" name="_captcha" value="false">
             <div class="form-row">
               <input type="text" name="name" placeholder="Full Name" required />
               <input type="email" name="email" placeholder="Email Address" required />
@@ -1265,7 +1277,13 @@
 
             <textarea name="message" placeholder="How can we help?" required></textarea>
 
-            <button type="submit" class="btn btn-primary">Send Message</button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <span id="btnText">Send Message</span>
+              <span id="spinner" style="display:none;">⏳</span>
+            </button>
+            <div id="errorMessage" style="display:none;color:red;font-weight:700;">
+              Something went wrong. Please try again.
+            </div>
             <div class="success-message" id="successMessage">
               Thank you! Your message has been received.
             </div>
@@ -1384,14 +1402,41 @@
     updateSlider();
     restartSlider();
 
-    // Contact form demo
+    // Contact form
     const contactForm = document.getElementById('contactForm');
     const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const spinner = document.getElementById('spinner');
 
-    contactForm.addEventListener('submit', function (e) {
+    contactForm.addEventListener('submit', async function(e) {
       e.preventDefault();
-      successMessage.style.display = 'block';
-      contactForm.reset();
+
+      btnText.textContent='Sending...';
+      spinner.style.display='inline';
+      successMessage.style.display='none';
+      errorMessage.style.display='none';
+
+      try {
+        const response = await fetch(contactForm.action, {
+          method:'POST',
+          body:new FormData(contactForm),
+          headers:{Accept:'application/json'}
+        });
+
+        if(response.ok){
+          successMessage.style.display='block';
+          contactForm.reset();
+        } else {
+          errorMessage.style.display='block';
+        }
+      } catch(e){
+        errorMessage.style.display='block';
+      }
+
+      btnText.textContent='Send Message';
+      spinner.style.display='none';
     });
 
     // Back to top
